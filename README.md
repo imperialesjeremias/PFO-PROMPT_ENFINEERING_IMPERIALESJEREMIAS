@@ -11,7 +11,7 @@ Trabajo práctico: diseño de un **único prompt de alta precisión** ejecutado 
 
 ## 2. Deploy unificado
 
-- **Portada (Vercel):** _[Pegar aquí el enlace de Vercel]_
+- **Portada (Vercel):** _[https://pfo-prompt-enfineering-imperialesje.vercel.app/]_
 
 La portada contiene los tres accesos requeridos:
 1. El prompt en texto plano (`prompt.txt`).
