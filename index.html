@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PFO2</title>
+<meta name="description" content="Un mismo prompt ejecutado en dos agentes de desarrollo para comparar su resolución autónoma.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0e1c;
+    --bg-soft:#13162b;
+    --panel:#161a30;
+    --line:rgba(255,255,255,.08);
+    --ink:#eef0fb;
+    --muted:#9aa1c4;
+    --faint:#6a7099;
+    --a-prompt:#c3b2ff;
+    --a-one:#5a9cff;
+    --a-two:#3fe0bf;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+  .bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .bg-fx::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(680px 420px at 16% -8%, rgba(90,156,255,.18), transparent 70%),
+      radial-gradient(680px 460px at 90% 4%, rgba(63,224,191,.13), transparent 70%);
+  }
+  .bg-fx::after{
+    content:"";position:absolute;inset:0;opacity:.55;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 28%, transparent 75%);
+            mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 28%, transparent 75%);
+  }
+  .wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:clamp(48px,9vw,104px) 22px 56px}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--faint);
+    display:inline-flex;align-items:center;gap:9px;
+    border:1px solid var(--line);border-radius:999px;
+    padding:7px 14px;background:rgba(255,255,255,.02);
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--a-two);box-shadow:0 0 10px var(--a-two)}
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(2.3rem,6vw,3.9rem);
+    line-height:1.05;
+    letter-spacing:-.02em;
+    margin:26px 0 0;
+  }
+  h1 .alt{color:var(--a-one)}
+  h1 .alt2{color:var(--a-two)}
+  .lede{margin-top:18px;max-width:56ch;color:var(--muted);font-size:clamp(1rem,2.2vw,1.14rem)}
+  .byline{margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--faint)}
+  .byline b{color:var(--ink);font-weight:500}
+
+  .deck{margin-top:clamp(36px,6vw,54px);display:grid;gap:14px}
+  .section-label{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--faint);margin:14px 2px 0;
+  }
+  a.card{
+    display:block;text-decoration:none;color:inherit;
+    background:linear-gradient(180deg,var(--panel),var(--bg-soft));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px 24px 22px;position:relative;overflow:hidden;
+    transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  a.card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--accent);opacity:.85;
+  }
+  a.card:hover{
+    transform:translateY(-4px);
+    border-color:color-mix(in srgb,var(--accent) 55%, var(--line));
+    box-shadow:0 18px 40px -22px var(--accent);
+  }
+  a.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .card-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .tag{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.08em;
+    color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%, transparent);
+    background:color-mix(in srgb,var(--accent) 10%, transparent);
+    padding:5px 11px;border-radius:999px;
+  }
+  .go{color:var(--faint);transition:transform .25s ease,color .25s ease;font-size:1.1rem}
+  a.card:hover .go{transform:translate(4px,-4px);color:var(--accent)}
+  .card h2{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.35rem;margin-top:16px;letter-spacing:-.01em}
+  .card p{color:var(--muted);margin-top:7px;font-size:.95rem}
+  .meta{
+    margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--faint);
+    display:flex;flex-wrap:wrap;gap:6px 18px;
+  }
+  .meta b{color:var(--accent);font-weight:500}
+
+  .prompt-card{--accent:var(--a-prompt)}
+  .two-up{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .agent-1{--accent:var(--a-one)}
+  .agent-2{--accent:var(--a-two)}
+
+  footer{
+    margin-top:46px;padding-top:22px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:12.5px;font-family:'JetBrains Mono',monospace;
+    display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;
+  }
+
+  @media (max-width:640px){ .two-up{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important;scroll-behavior:auto!important} }
+</style>
+</head>
+<body>
+  <div class="bg-fx" aria-hidden="true"></div>
+  <main class="wrap">
+    <span class="eyebrow"><span class="dot"></span>PFO2 · PROMPT ENGINEERING</span>
+
+    <h1>Un prompt.<br><span class="alt">Dos agentes.</span> <span class="alt2">Un experimento.</span></h1>
+
+    <p class="lede">Una misma instrucción de alta precisión, ejecutada de forma autónoma en dos agentes de desarrollo, para comparar cómo resuelven la misma landing page sin intervención manual sobre el código.</p>
+
+    <p class="byline">Estudiante: <b>IMPERIALES JEREMIAS LEON</b> &nbsp;·&nbsp; Materia: <b>DESARROLLO WEB FRONTEND</b></p>
+
+    <div class="deck">
+      <p class="section-label">Punto de partida</p>
+      <a class="card prompt-card" href="./prompt.txt" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="tag">Prompt</span>
+          <span class="go" aria-hidden="true">↗</span>
+        </div>
+        <h2>El prompt utilizado</h2>
+        <p>El texto plano exacto que recibieron ambos agentes, en igualdad de condiciones.</p>
+      </a>
+
+      <p class="section-label">Resultados a comparar</p>
+      <div class="two-up">
+        <a class="card agent-1" href="./agente-1/">
+          <div class="card-top">
+            <span class="tag">Agente 1</span>
+            <span class="go" aria-hidden="true">↗</span>
+          </div>
+          <h2>Landing page</h2>
+          <p>Resultado generado por el primer agente.</p>
+          <div class="meta">
+            <span>Agente: <b>Agente 1</b></span>
+            <span>Modelo: <b>CODEX</b></span>
+          </div>
+        </a>
+
+        <a class="card agent-2" href="./agente-2/">
+          <div class="card-top">
+            <span class="tag">Agente 2</span>
+            <span class="go" aria-hidden="true">↗</span>
+          </div>
+          <h2>Landing page</h2>
+          <p>Resultado generado por el segundo agente.</p>
+          <div class="meta">
+            <span>Agente: <b>Agente 2</b></span>
+            <span>Modelo: <b>CLAUDE</b></span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <footer>
+      <span>IFTS N.°29 · Desarrollo Web Frontend · 2026</span>
+      <span>2026</span>
+    </footer>
+  </main>
+</body>
+</html>

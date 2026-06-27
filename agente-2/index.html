@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cumbre — Gestión de tareas y proyectos para equipos pequeños</title>
+  <meta name="description" content="Cumbre organiza las tareas, los plazos y las prioridades de tu equipo en un solo lugar. Lleva a tu equipo a la cima, sin el caos de las herramientas complicadas." />
+  <meta name="theme-color" content="#FAFAFE" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234338CA'/%3E%3Cpath d='M5 24 L14 9 L19 18 L22 13 L27 24 Z' fill='%23ffffff'/%3E%3Cpath d='M14 9 L17 14 L11 14 Z' fill='%23FF6A4D'/%3E%3C/svg%3E" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Cumbre — Lleva a tu equipo a la cima" />
+  <meta property="og:description" content="Gestión de tareas y proyectos, simple y potente, para equipos pequeños, freelancers y startups." />
+  <meta property="og:type" content="website" />
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================
+       TOKENS
+    ========================================================= */
+    :root{
+      --ink:        #1B1A3F;   /* índigo casi negro: titulares */
+      --ink-soft:   #2D2C57;
+      --indigo:     #4338CA;   /* índigo de marca: enlaces, acentos */
+      --indigo-bright:#6D5EF6; /* índigo claro: degradados, foco */
+      --coral:      #FF6A4D;   /* acento cálido: CTA, detalles */
+      --coral-hover:#FF5638;   /* hover del CTA */
+      --coral-ink:  #241F4D;   /* texto sobre coral (contraste AA) */
+      --slate:      #54577A;   /* texto de cuerpo */
+      --slate-soft: #797DA0;   /* texto secundario */
+      --line:       #E6E8F6;   /* bordes y hairlines */
+      --tint:       #EEF0FE;   /* fondo tintado índigo */
+      --tint-2:     #F5F6FE;
+      --surface:    #FFFFFF;
+      --bg:         #FAFAFE;
+
+      --radius:     20px;
+      --radius-sm:  12px;
+      --radius-lg:  28px;
+      --pill:       999px;
+
+      --shadow-sm:  0 1px 2px rgba(27,26,63,.05), 0 6px 16px rgba(27,26,63,.05);
+      --shadow-md:  0 14px 34px rgba(27,26,63,.10);
+      --shadow-lg:  0 30px 70px rgba(27,26,63,.18);
+      --shadow-coral:0 12px 26px rgba(255,86,56,.32);
+
+      --maxw:       1180px;
+      --header-h:   72px;
+      --ease:       cubic-bezier(.22,.7,.24,1);
+    }
+
+    /* =========================================================
+       RESET / BASE
+    ========================================================= */
+    *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+
+    html{
+      scroll-behavior:smooth;
+      scroll-padding-top: calc(var(--header-h) + 12px);
+      -webkit-text-size-adjust:100%;
+    }
+
+    body{
+      font-family:"Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+      color:var(--ink);
+      background:var(--bg);
+      line-height:1.6;
+      font-size:1.0625rem;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+      overflow-x:hidden;
+    }
+
+    h1,h2,h3,h4{
+      font-family:"Bricolage Grotesque", system-ui, sans-serif;
+      color:var(--ink);
+      line-height:1.08;
+      letter-spacing:-.02em;
+      font-weight:700;
+    }
+
+    p{ color:var(--slate); }
+    a{ color:var(--indigo); text-decoration:none; }
+    img,svg{ display:block; max-width:100%; }
+    ul{ list-style:none; }
+    button{ font-family:inherit; cursor:pointer; border:none; background:none; }
+
+    /* Foco visible para teclado */
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible{
+      outline:3px solid var(--indigo-bright);
+      outline-offset:3px;
+      border-radius:6px;
+    }
+
+    .skip-link{
+      position:absolute; left:50%; top:-100px; transform:translateX(-50%);
+      background:var(--ink); color:#fff; padding:.7rem 1.2rem;
+      border-radius:0 0 12px 12px; z-index:200; font-weight:600;
+      transition:top .2s var(--ease);
+    }
+    .skip-link:focus{ top:0; }
+
+    /* =========================================================
+       LAYOUT HELPERS
+    ========================================================= */
+    .container{ width:min(100% - 2.5rem, var(--maxw)); margin-inline:auto; }
+    .section{ padding:clamp(64px, 9vw, 120px) 0; position:relative; }
+    .section--tint{ background:linear-gradient(180deg, var(--bg) 0%, var(--tint-2) 60%, var(--bg) 100%); }
+
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:.5rem;
+      font-family:"Hanken Grotesk", sans-serif;
+      font-size:.8rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--indigo);
+      background:var(--tint);
+      padding:.45rem .85rem; border-radius:var(--pill);
+    }
+    .eyebrow svg{ width:13px; height:13px; }
+
+    .section-head{ max-width:680px; margin-bottom:clamp(2.5rem,5vw,4rem); }
+    .section-head.center{ margin-inline:auto; text-align:center; }
+    .section-head h2{ font-size:clamp(2rem, 4.4vw, 3rem); margin:1.1rem 0 .9rem; }
+    .section-head p{ font-size:1.125rem; }
+
+    /* =========================================================
+       BOTONES
+    ========================================================= */
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:.55rem;
+      font-weight:700; font-size:1rem; letter-spacing:-.01em;
+      padding:.85rem 1.5rem; border-radius:var(--pill);
+      transition:transform .25s var(--ease), box-shadow .25s var(--ease),
+                 background-color .25s var(--ease), color .25s var(--ease),
+                 border-color .25s var(--ease);
+      white-space:nowrap;
+    }
+    .btn svg{ width:18px; height:18px; }
+
+    .btn-primary{
+      background:var(--coral); color:var(--coral-ink);
+      box-shadow:var(--shadow-coral);
+    }
+    .btn-primary:hover{ background:var(--coral-hover); transform:translateY(-2px); box-shadow:0 16px 32px rgba(255,86,56,.40); }
+    .btn-primary:active{ transform:translateY(0); }
+
+    .btn-ghost{
+      background:var(--surface); color:var(--ink);
+      border:1.5px solid var(--line);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn-ghost:hover{ border-color:var(--indigo); color:var(--indigo); transform:translateY(-2px); }
+
+    .btn-lg{ padding:1rem 1.85rem; font-size:1.075rem; }
+    .btn-block{ width:100%; }
+
+    /* =========================================================
+       HEADER / NAV
+    ========================================================= */
+    .site-header{
+      position:sticky; top:0; z-index:100;
+      height:var(--header-h);
+      background:rgba(250,250,254,.72);
+      -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+      border-bottom:1px solid transparent;
+      transition:border-color .3s var(--ease), background-color .3s var(--ease), box-shadow .3s var(--ease);
+    }
+    .site-header.scrolled{
+      border-bottom-color:var(--line);
+      box-shadow:0 4px 20px rgba(27,26,63,.05);
+    }
+    .nav{ height:100%; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+
+    .brand{ display:inline-flex; align-items:center; gap:.6rem; color:var(--ink); }
+    .brand-mark{ width:34px; height:34px; flex:none; }
+    .brand-name{
+      font-family:"Bricolage Grotesque", sans-serif;
+      font-weight:800; font-size:1.4rem; letter-spacing:-.03em;
+    }
+
+    .nav-links{ display:flex; align-items:center; gap:.35rem; }
+    .nav-links a{
+      color:var(--slate); font-weight:600; font-size:.97rem;
+      padding:.5rem .8rem; border-radius:10px;
+      position:relative; transition:color .2s var(--ease), background-color .2s var(--ease);
+    }
+    .nav-links a:hover{ color:var(--ink); background:var(--tint); }
+    .nav-links a.active{ color:var(--indigo); }
+    .nav-links a.active::after{
+      content:""; position:absolute; left:50%; bottom:.18rem; transform:translateX(-50%);
+      width:18px; height:3px; border-radius:3px; background:var(--coral);
+    }
+
+    .nav-actions{ display:flex; align-items:center; gap:.5rem; }
+
+    /* Hamburguesa */
+    .nav-toggle{
+      display:none; width:44px; height:44px; border-radius:12px;
+      align-items:center; justify-content:center; flex-direction:column; gap:5px;
+      border:1.5px solid var(--line); background:var(--surface);
+    }
+    .nav-toggle span{
+      display:block; width:20px; height:2px; border-radius:2px; background:var(--ink);
+      transition:transform .3s var(--ease), opacity .2s var(--ease);
+    }
+    .nav-toggle[aria-expanded="true"] span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] span:nth-child(2){ opacity:0; }
+    .nav-toggle[aria-expanded="true"] span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+    /* Panel móvil */
+    .mobile-nav{
+      position:fixed; left:0; right:0; top:var(--header-h);
+      background:var(--surface); border-bottom:1px solid var(--line);
+      box-shadow:var(--shadow-md);
+      padding:1rem 1.25rem 1.5rem;
+      display:flex; flex-direction:column; gap:.25rem;
+      transform:translateY(-12px); opacity:0; visibility:hidden; pointer-events:none;
+      transition:transform .3s var(--ease), opacity .3s var(--ease), visibility .3s;
+      z-index:99;
+    }
+    .mobile-nav.open{ transform:translateY(0); opacity:1; visibility:visible; pointer-events:auto; }
+    .mobile-nav a{
+      color:var(--ink-soft); font-weight:600; font-size:1.1rem;
+      padding:.85rem .5rem; border-radius:10px; border-bottom:1px solid var(--line);
+    }
+    .mobile-nav a:last-of-type{ border-bottom:none; }
+    .mobile-nav a.active{ color:var(--indigo); }
+    .mobile-nav .btn{ margin-top:.85rem; }
+
+    body.nav-open{ overflow:hidden; }
+
+    /* =========================================================
+       HERO
+    ========================================================= */
+    .hero{ position:relative; padding:clamp(40px,6vw,72px) 0 clamp(60px,9vw,108px); overflow:hidden; }
+    .hero::before{ /* resplandor suave */
+      content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(60% 50% at 78% 8%, rgba(109,94,246,.16), transparent 70%),
+        radial-gradient(46% 42% at 8% 26%, rgba(255,106,77,.12), transparent 70%);
+    }
+    .hero-contours{
+      position:absolute; inset:auto 0 -2% 0; z-index:0; width:100%; height:88%;
+      opacity:.5; pointer-events:none;
+    }
+    .hero-grid{
+      position:relative; z-index:1;
+      display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,4rem);
+      align-items:center;
+    }
+
+    .hero-copy .eyebrow{ margin-bottom:1.35rem; }
+    .hero h1{
+      font-size:clamp(2.6rem, 6.4vw, 4.4rem); font-weight:800;
+      margin-bottom:1.3rem;
+    }
+    .hero h1 .peak{ position:relative; color:var(--indigo); white-space:nowrap; }
+    .hero h1 .peak svg{
+      position:absolute; left:0; right:0; bottom:-.32em; width:100%; height:.34em;
+    }
+    .hero-sub{ font-size:clamp(1.1rem,1.7vw,1.275rem); max-width:34rem; margin-bottom:2rem; }
+    .hero-cta{ display:flex; flex-wrap:wrap; gap:.85rem; margin-bottom:1.5rem; }
+    .hero-trust{
+      display:flex; align-items:center; gap:.55rem;
+      font-size:.92rem; color:var(--slate-soft); font-weight:500;
+    }
+    .hero-trust svg{ width:18px; height:18px; color:var(--indigo); flex:none; }
+
+    /* Mockup del producto */
+    .mockup-wrap{ position:relative; }
+    .mockup{
+      position:relative; z-index:2;
+      background:var(--surface); border:1px solid var(--line);
+      border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+      padding:.9rem; overflow:hidden;
+    }
+    .mockup-bar{ display:flex; align-items:center; gap:.6rem; padding:.4rem .55rem .85rem; }
+    .mockup-dots{ display:flex; gap:6px; }
+    .mockup-dots i{ width:11px; height:11px; border-radius:50%; display:block; }
+    .mockup-dots i:nth-child(1){ background:#FF6A5A; }
+    .mockup-dots i:nth-child(2){ background:#FFC24B; }
+    .mockup-dots i:nth-child(3){ background:#39C77E; }
+    .mockup-title{
+      font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:.92rem; color:var(--ink-soft);
+      display:flex; align-items:center; gap:.4rem;
+    }
+    .mockup-title svg{ width:15px; height:15px; color:var(--indigo); }
+    .mockup-badge{
+      margin-left:auto; display:inline-flex; align-items:center; gap:.35rem;
+      background:var(--tint); color:var(--indigo); font-weight:700; font-size:.74rem;
+      padding:.3rem .6rem; border-radius:var(--pill);
+    }
+    .mockup-badge svg{ width:12px; height:12px; }
+
+    .board{ display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; }
+    .col{ background:var(--tint-2); border-radius:14px; padding:.6rem .55rem; min-width:0; }
+    .col-head{
+      display:flex; align-items:center; justify-content:space-between;
+      font-weight:700; font-size:.74rem; color:var(--slate); text-transform:uppercase; letter-spacing:.04em;
+      padding:.15rem .25rem .55rem;
+    }
+    .col-head span{
+      background:#fff; color:var(--slate-soft); border-radius:var(--pill);
+      font-size:.66rem; padding:.05rem .4rem; border:1px solid var(--line);
+    }
+    .card{
+      background:#fff; border:1px solid var(--line); border-radius:11px;
+      padding:.55rem .6rem; margin-bottom:.45rem; box-shadow:0 1px 2px rgba(27,26,63,.04);
+    }
+    .card:last-child{ margin-bottom:0; }
+    .tag{ display:inline-block; font-size:.62rem; font-weight:700; padding:.12rem .45rem; border-radius:6px; margin-bottom:.4rem; }
+    .tag.t-urg{ background:#FFE7E0; color:#C23B1C; }
+    .tag.t-mid{ background:#FFF1D6; color:#9A6B05; }
+    .tag.t-low{ background:var(--tint); color:var(--indigo); }
+    .tag.t-done{ background:#DEF6E8; color:#1C7A47; }
+    .card-title{ font-size:.78rem; font-weight:600; color:var(--ink-soft); line-height:1.35; }
+    .card.done .card-title{ color:var(--slate-soft); text-decoration:line-through; }
+    .card-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:.5rem; }
+    .av{
+      width:21px; height:21px; border-radius:50%; display:grid; place-items:center;
+      font-size:.6rem; font-weight:700; color:#fff;
+    }
+    .av.a1{ background:linear-gradient(135deg,#6D5EF6,#4338CA); }
+    .av.a2{ background:linear-gradient(135deg,#FF8A5C,#F2542D); }
+    .av.a3{ background:linear-gradient(135deg,#3FB9C9,#2E7CB8); }
+    .due{ font-size:.64rem; color:var(--slate-soft); font-weight:600; }
+    .check{ width:18px; height:18px; color:#1C7A47; }
+
+    .summit{
+      margin-top:.75rem; padding:.7rem .75rem; background:var(--ink);
+      border-radius:14px; display:flex; align-items:center; gap:.7rem; color:#fff;
+    }
+    .summit-label{ font-size:.74rem; font-weight:600; color:#C9CBE8; white-space:nowrap; }
+    .summit-bar{ flex:1; height:7px; background:rgba(255,255,255,.16); border-radius:99px; overflow:hidden; }
+    .summit-fill{ width:78%; height:100%; background:linear-gradient(90deg,var(--indigo-bright),var(--coral)); border-radius:99px; }
+    .summit-pct{ font-size:.8rem; font-weight:800; color:#fff; }
+
+    /* Tarjetas flotantes del mockup */
+    .float{
+      position:absolute; z-index:3; background:#fff; border:1px solid var(--line);
+      border-radius:14px; box-shadow:var(--shadow-md); padding:.6rem .75rem;
+      display:flex; align-items:center; gap:.55rem; font-weight:600; font-size:.8rem; color:var(--ink-soft);
+    }
+    .float svg{ width:30px; height:30px; flex:none; }
+    .float-1{ top:-16px; right:-14px; }
+    .float-2{ bottom:-18px; left:-16px; }
+
+    /* =========================================================
+       SOBRE NOSOTROS
+    ========================================================= */
+    .about-top{ display:grid; grid-template-columns:1fr 1.05fr; gap:clamp(2rem,5vw,4.5rem); align-items:start; }
+    .about-top h2{ font-size:clamp(1.9rem,4vw,2.85rem); }
+    .about-text p + p{ margin-top:1.1rem; }
+    .about-text p{ font-size:1.075rem; }
+
+    .stats{
+      position:relative; overflow:hidden;
+      margin-top:clamp(2.5rem,5vw,4rem);
+      background:linear-gradient(135deg,#3D34BE 0%, #4F46E5 55%, #6D5EF6 100%);
+      border-radius:var(--radius-lg); padding:clamp(2rem,4vw,3.25rem);
+      box-shadow:var(--shadow-md);
+    }
+    .stats-contours{ position:absolute; right:-4%; bottom:-10%; width:46%; opacity:.22; pointer-events:none; }
+    .stats-grid{
+      position:relative; z-index:1;
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem;
+    }
+    .stat{ color:#fff; }
+    .stat-num{
+      font-family:"Bricolage Grotesque",sans-serif; font-weight:800;
+      font-size:clamp(2.6rem,5vw,3.5rem); line-height:1; letter-spacing:-.03em;
+      display:flex; align-items:baseline; gap:.1rem;
+    }
+    .stat-num .accent{ color:#FFB59E; }
+    .stat-label{ margin-top:.6rem; font-size:.97rem; color:#DEDDFB; font-weight:500; max-width:14rem; }
+    .stat + .stat{ position:relative; }
+    @media (min-width:741px){
+      .stat + .stat::before{
+        content:""; position:absolute; left:-.75rem; top:.2rem; bottom:.2rem;
+        width:1px; background:rgba(255,255,255,.18);
+      }
+    }
+
+    /* =========================================================
+       CARACTERÍSTICAS
+    ========================================================= */
+    .features-grid{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;
+    }
+    .feature{
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+      padding:1.75rem 1.6rem; box-shadow:var(--shadow-sm);
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
+    }
+    .feature:hover{ transform:translateY(-5px); box-shadow:var(--shadow-md); border-color:#D9DCF4; }
+    .f-icon{
+      width:52px; height:52px; border-radius:15px; display:grid; place-items:center;
+      background:var(--tint); color:var(--indigo); margin-bottom:1.15rem;
+      transition:background-color .3s var(--ease), color .3s var(--ease), transform .3s var(--ease);
+    }
+    .f-icon svg{ width:26px; height:26px; }
+    .feature:hover .f-icon{ background:var(--indigo); color:#fff; transform:scale(1.05) rotate(-3deg); }
+    .feature h3{ font-size:1.22rem; margin-bottom:.55rem; }
+    .feature p{ font-size:1rem; }
+
+    /* =========================================================
+       TESTIMONIOS
+    ========================================================= */
+    .testi-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; }
+    .testi{
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+      padding:1.75rem 1.65rem; box-shadow:var(--shadow-sm); display:flex; flex-direction:column;
+      transition:transform .3s var(--ease), box-shadow .3s var(--ease);
+    }
+    .testi:hover{ transform:translateY(-4px); box-shadow:var(--shadow-md); }
+    .stars{ display:flex; gap:2px; margin-bottom:1rem; color:var(--coral); }
+    .stars svg{ width:18px; height:18px; }
+    .quote{ font-size:1.075rem; color:var(--ink-soft); line-height:1.55; flex:1; }
+    .quote::before{ content:"“"; color:var(--indigo); font-weight:800; }
+    .quote::after{ content:"”"; color:var(--indigo); font-weight:800; }
+    .testi-person{ display:flex; align-items:center; gap:.8rem; margin-top:1.4rem; padding-top:1.25rem; border-top:1px solid var(--line); }
+    .avatar{
+      width:46px; height:46px; border-radius:50%; flex:none; display:grid; place-items:center;
+      font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:1rem; color:#fff;
+    }
+    .avatar.v1{ background:linear-gradient(135deg,#6D5EF6,#4338CA); }
+    .avatar.v2{ background:linear-gradient(135deg,#FF8A5C,#F2542D); }
+    .avatar.v3{ background:linear-gradient(135deg,#3FB9C9,#2E7CB8); }
+    .person-name{ font-weight:700; color:var(--ink); font-size:1rem; }
+    .person-role{ font-size:.875rem; color:var(--slate-soft); }
+
+    /* =========================================================
+       CONTACTO
+    ========================================================= */
+    .contact-grid{ display:grid; grid-template-columns:.85fr 1.15fr; gap:clamp(2rem,5vw,4rem); align-items:start; }
+    .contact-info h2{ font-size:clamp(1.9rem,4vw,2.75rem); margin:1.1rem 0 1rem; }
+    .contact-info p{ font-size:1.1rem; max-width:24rem; }
+    .contact-list{ margin-top:2rem; display:flex; flex-direction:column; gap:1.1rem; }
+    .contact-item{ display:flex; align-items:center; gap:.9rem; }
+    .contact-item .ci-ic{
+      width:44px; height:44px; border-radius:13px; background:var(--tint); color:var(--indigo);
+      display:grid; place-items:center; flex:none;
+    }
+    .contact-item .ci-ic svg{ width:21px; height:21px; }
+    .contact-item strong{ color:var(--ink); font-size:1rem; display:block; }
+    .contact-item span{ font-size:.9rem; color:var(--slate-soft); }
+
+    .contact-card{
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+      padding:clamp(1.5rem,3vw,2.25rem); box-shadow:var(--shadow-md);
+    }
+    .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .field{ margin-bottom:1.1rem; }
+    .field label{
+      display:block; font-weight:600; font-size:.9rem; color:var(--ink-soft); margin-bottom:.45rem;
+    }
+    .field label .req{ color:var(--coral); }
+    .field input,
+    .field textarea{
+      width:100%; font-family:inherit; font-size:1rem; color:var(--ink);
+      background:var(--tint-2); border:1.5px solid var(--line); border-radius:12px;
+      padding:.8rem .95rem; transition:border-color .2s var(--ease), background-color .2s var(--ease), box-shadow .2s var(--ease);
+    }
+    .field input::placeholder,
+    .field textarea::placeholder{ color:#9A9DBC; }
+    .field input:focus,
+    .field textarea:focus{
+      outline:none; border-color:var(--indigo); background:#fff;
+      box-shadow:0 0 0 4px rgba(67,56,202,.12);
+    }
+    .field textarea{ resize:vertical; min-height:118px; }
+
+    .form-note{ font-size:.82rem; color:var(--slate-soft); margin-top:.85rem; text-align:center; }
+    .form-note a{ color:var(--indigo); text-decoration:underline; }
+
+    .form-status{ margin-bottom:1.1rem; }
+    .status-card{
+      display:flex; align-items:center; gap:.85rem;
+      background:#E7F8EE; border:1.5px solid #B9E8CD; border-radius:14px;
+      padding:1rem 1.1rem; color:#14532D;
+      animation:pop .4s var(--ease);
+    }
+    .status-card:focus{ outline:3px solid var(--indigo-bright); outline-offset:2px; }
+    .status-icon{ width:40px; height:40px; flex:none; border-radius:50%; background:#1C7A47; color:#fff; display:grid; place-items:center; }
+    .status-icon svg{ width:22px; height:22px; }
+    .status-card strong{ display:block; font-size:1rem; }
+    .status-card span{ font-size:.9rem; color:#2A6B45; }
+    @keyframes pop{ from{ opacity:0; transform:translateY(-8px) scale(.98);} to{ opacity:1; transform:none; } }
+
+    /* =========================================================
+       FOOTER
+    ========================================================= */
+    .footer{ background:var(--ink); color:#C9CBE8; padding:clamp(3.5rem,6vw,5rem) 0 2rem; position:relative; overflow:hidden; }
+    .footer-contours{ position:absolute; left:-2%; bottom:-30%; width:34%; opacity:.12; pointer-events:none; }
+    .footer-grid{
+      position:relative; z-index:1;
+      display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:2.5rem;
+      padding-bottom:3rem; border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .footer-brand .brand-name{ color:#fff; }
+    .footer-brand .brand{ color:#fff; margin-bottom:1rem; }
+    .footer-slogan{ font-size:1rem; color:#A9ACD4; max-width:18rem; margin-bottom:1.5rem; }
+    .socials{ display:flex; gap:.6rem; }
+    .socials a{
+      width:40px; height:40px; border-radius:11px; display:grid; place-items:center;
+      background:rgba(255,255,255,.08); color:#C9CBE8;
+      transition:background-color .2s var(--ease), color .2s var(--ease), transform .2s var(--ease);
+    }
+    .socials a:hover{ background:var(--coral); color:var(--coral-ink); transform:translateY(-3px); }
+    .socials a svg{ width:18px; height:18px; }
+
+    .footer-col h4{ color:#fff; font-size:.8rem; text-transform:uppercase; letter-spacing:.12em; margin-bottom:1.1rem; font-family:"Hanken Grotesk",sans-serif; font-weight:700; }
+    .footer-col ul li{ margin-bottom:.7rem; }
+    .footer-col a{ color:#B6B9DD; font-size:.95rem; transition:color .2s var(--ease); }
+    .footer-col a:hover{ color:#fff; }
+
+    .footer-bottom{
+      position:relative; z-index:1;
+      padding-top:2rem; display:flex; flex-wrap:wrap; gap:.75rem 1.5rem;
+      align-items:center; justify-content:space-between;
+      font-size:.875rem; color:#9295BE;
+    }
+    .footer-bottom .made{ display:inline-flex; align-items:center; gap:.4rem; }
+    .footer-bottom .made svg{ width:15px; height:15px; color:var(--coral); }
+
+    /* =========================================================
+       REVEAL ANIMATIONS (solo con JS)
+    ========================================================= */
+    .js .reveal{ opacity:0; transform:translateY(20px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+    .js .reveal.in{ opacity:1; transform:none; }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+    @media (max-width:980px){
+      .features-grid,
+      .testi-grid{ grid-template-columns:repeat(2,1fr); }
+      .hero-grid{ grid-template-columns:1fr; gap:3rem; }
+      .hero-copy{ max-width:38rem; }
+      .mockup-wrap{ max-width:480px; margin-inline:auto; }
+      .about-top{ grid-template-columns:1fr; gap:1.5rem; }
+      .contact-grid{ grid-template-columns:1fr; }
+      .footer-grid{ grid-template-columns:1.3fr 1fr 1fr; }
+      .footer-brand{ grid-column:1 / -1; }
+    }
+
+    @media (max-width:860px){
+      .nav-links{ display:none; }
+      .nav-actions .btn{ display:none; }
+      .nav-toggle{ display:flex; }
+    }
+
+    @media (max-width:740px){
+      .features-grid,
+      .testi-grid,
+      .stats-grid{ grid-template-columns:1fr; }
+      .form-row{ grid-template-columns:1fr; }
+      .stats-grid{ gap:2rem; }
+      .footer-grid{ grid-template-columns:1fr 1fr; gap:2rem 1.5rem; }
+      .footer-bottom{ flex-direction:column; align-items:flex-start; }
+    }
+
+    @media (max-width:560px){
+      .board{ grid-template-columns:repeat(2,1fr); }
+      .col--done{ display:none; }
+      .hero-cta .btn{ flex:1; }
+      .float-1{ right:-4px; top:-12px; }
+      .float-2{ left:-4px; }
+    }
+
+    @media (max-width:430px){
+      .footer-grid{ grid-template-columns:1fr; }
+    }
+
+    /* Movimiento reducido */
+    @media (prefers-reduced-motion: reduce){
+      html{ scroll-behavior:auto; }
+      .js .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+      *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header">
+    <div class="container nav">
+      <div class="flex items-center gap-3">
+        <a href="../index.html" style="font-size:0.8rem; color:#54577A; text-decoration:none; white-space:nowrap; font-weight:500;">← Comparativa</a>
+        <a href="#inicio" class="brand" aria-label="Cumbre, inicio">
+          <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+            <rect width="36" height="36" rx="10" fill="#4338CA"/>
+            <path d="M6 27 L16 11 L21 20 L24.5 14.5 L30 27 Z" fill="#fff"/>
+            <path d="M16 11 L19.2 16.4 L12.8 16.4 Z" fill="#FF6A4D"/>
+          </svg>
+          <span class="brand-name">Cumbre</span>
+        </a>
+      </div>
+
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="#inicio">Inicio</a>
+        <a href="#nosotros">Nosotros</a>
+        <a href="#caracteristicas">Características</a>
+        <a href="#testimonios">Testimonios</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#contacto" class="btn btn-primary">Empezar gratis</a>
+        <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Menú móvil -->
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Navegación móvil">
+      <a href="../index.html" style="font-weight:600; color:#4338CA;">← Volver a la comparativa</a>
+      <a href="#inicio">Inicio</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#caracteristicas">Características</a>
+      <a href="#testimonios">Testimonios</a>
+      <a href="#contacto">Contacto</a>
+      <a href="#contacto" class="btn btn-primary btn-block">Empezar gratis</a>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="inicio">
+      <!-- Líneas de contorno topográfico (firma visual) -->
+      <svg class="hero-contours" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="#4338CA" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.16">
+          <path d="M40 600 L600 90 L1160 600"/>
+          <path d="M130 600 L600 175 L1070 600"/>
+          <path d="M220 600 L600 260 L980 600"/>
+          <path d="M310 600 L600 345 L890 600"/>
+          <path d="M400 600 L600 430 L800 600"/>
+        </g>
+        <path d="M560 130 L600 90 L640 130" fill="none" stroke="#FF6A4D" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <span class="eyebrow">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 L12 5 L17 13 L20.5 8 L24 20 Z" fill="currentColor"/></svg>
+            Tareas y proyectos para equipos pequeños
+          </span>
+          <h1>Lleva a tu equipo
+            <span class="peak">a la cima
+              <svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M2 11 C50 3, 150 3, 198 9" fill="none" stroke="#FF6A4D" stroke-width="5" stroke-linecap="round"/>
+              </svg>
+            </span>
+          </h1>
+          <p class="hero-sub">Cumbre organiza las tareas, los plazos y las prioridades de tu equipo en un solo lugar. Sin planillas eternas ni herramientas imposibles de aprender.</p>
+          <div class="hero-cta">
+            <a href="#contacto" class="btn btn-primary btn-lg">Empezar gratis</a>
+            <a href="#producto" class="btn btn-ghost btn-lg">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              Ver demo
+            </a>
+          </div>
+          <p class="hero-trust">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" fill="currentColor"/></svg>
+            Gratis para equipos de hasta 5 personas · Sin tarjeta de crédito
+          </p>
+        </div>
+
+        <!-- Mockup del producto -->
+        <div class="mockup-wrap reveal" style="transition-delay:.12s">
+          <figure class="mockup" id="producto" aria-label="Vista previa del tablero de tareas de Cumbre">
+            <div class="mockup-bar">
+              <div class="mockup-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="mockup-title">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 L12 5 L17 13 L20.5 8 L24 20 Z" fill="currentColor"/></svg>
+                Lanzamiento v2.0
+              </div>
+              <span class="mockup-badge">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 L12 5 L17 13 L20.5 8 L24 20 Z" fill="currentColor"/></svg>
+                A tiempo
+              </span>
+            </div>
+
+            <div class="board">
+              <!-- Por hacer -->
+              <div class="col">
+                <div class="col-head">Por hacer <span>3</span></div>
+                <div class="card">
+                  <span class="tag t-urg">Urgente</span>
+                  <div class="card-title">Diseñar la página de precios</div>
+                  <div class="card-foot"><span class="av a1">LF</span><span class="due">24 jun</span></div>
+                </div>
+                <div class="card">
+                  <span class="tag t-low">Normal</span>
+                  <div class="card-title">Redactar el correo de bienvenida</div>
+                  <div class="card-foot"><span class="av a2">MR</span><span class="due">26 jun</span></div>
+                </div>
+              </div>
+              <!-- En curso -->
+              <div class="col">
+                <div class="col-head">En curso <span>2</span></div>
+                <div class="card">
+                  <span class="tag t-mid">Media</span>
+                  <div class="card-title">Integrar pasarela de pago</div>
+                  <div class="card-foot"><span class="av a3">VC</span><span class="due">Hoy</span></div>
+                </div>
+                <div class="card">
+                  <span class="tag t-low">Normal</span>
+                  <div class="card-title">Revisar textos del landing</div>
+                  <div class="card-foot"><span class="av a1">LF</span><span class="due">25 jun</span></div>
+                </div>
+              </div>
+              <!-- Hecho -->
+              <div class="col col--done">
+                <div class="col-head">Hecho <span>5</span></div>
+                <div class="card done">
+                  <span class="tag t-done">Listo</span>
+                  <div class="card-title">Definir objetivos del trimestre</div>
+                  <div class="card-foot"><span class="av a2">MR</span><svg class="check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" fill="currentColor"/></svg></div>
+                </div>
+                <div class="card done">
+                  <span class="tag t-done">Listo</span>
+                  <div class="card-title">Crear el plan de marketing</div>
+                  <div class="card-foot"><span class="av a3">VC</span><svg class="check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" fill="currentColor"/></svg></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="summit">
+              <span class="summit-label">Camino a la cima</span>
+              <div class="summit-bar" role="img" aria-label="Progreso del proyecto: 78 por ciento completado"><div class="summit-fill"></div></div>
+              <span class="summit-pct">78%</span>
+            </div>
+          </figure>
+
+          <div class="float float-1" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#EEF0FE"/><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="#4338CA" stroke-width="1.6" transform="scale(.55) translate(9.8 9.8)"/><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="#4338CA" stroke-width="1.6" transform="scale(.55) translate(9.8 9.8)"/></svg>
+            Recordatorio enviado
+          </div>
+          <div class="float float-2" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#FFEDE6"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" fill="none" stroke="#F2542D" stroke-width="1.6" transform="scale(.55) translate(9.8 9.8)"/><circle cx="9" cy="7" r="4" fill="none" stroke="#F2542D" stroke-width="1.6" transform="scale(.55) translate(9.8 9.8)"/></svg>
+            Tarea asignada a Valentina
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SOBRE NOSOTROS ===================== -->
+    <section class="section section--tint" id="nosotros">
+      <div class="container">
+        <div class="about-top">
+          <div class="reveal">
+            <span class="eyebrow">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 L12 5 L17 13 L20.5 8 L24 20 Z" fill="currentColor"/></svg>
+              Nuestra misión
+            </span>
+            <h2 style="margin-top:1.1rem;">Las metas grandes se conquistan paso a paso</h2>
+          </div>
+          <div class="about-text reveal" style="transition-delay:.1s">
+            <p>Cumbre nació de una frustración simple: las mejores herramientas de gestión parecían diseñadas para grandes corporaciones, no para equipos que recién empiezan. Planillas que nadie actualiza, hilos de correo infinitos y tableros tan complejos que terminabas administrando la herramienta en lugar de tu trabajo.</p>
+            <p>Por eso construimos algo distinto. Cumbre es lo bastante potente para coordinar proyectos reales y lo bastante simple para que todo tu equipo lo adopte el primer día. Creemos que cada equipo —por pequeño que sea— merece llegar a su propia cima.</p>
+          </div>
+        </div>
+
+        <div class="stats reveal" style="transition-delay:.1s">
+          <svg class="stats-contours" viewBox="0 0 400 400" aria-hidden="true" focusable="false">
+            <g fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round">
+              <path d="M20 380 L200 60 L380 380"/>
+              <path d="M80 380 L200 160 L320 380"/>
+              <path d="M130 380 L200 240 L270 380"/>
+            </g>
+          </svg>
+          <div class="stats-grid">
+            <div class="stat">
+              <div class="stat-num"><span class="accent">+</span>10.000</div>
+              <div class="stat-label">equipos activos en todo el mundo confían en Cumbre</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">98<span class="accent">%</span></div>
+              <div class="stat-label">de satisfacción entre quienes usan Cumbre a diario</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">4,9<span class="accent">/5</span></div>
+              <div class="stat-label">valoración media en las tiendas de aplicaciones</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CARACTERÍSTICAS ===================== -->
+    <section class="section" id="caracteristicas">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 L12 5 L17 13 L20.5 8 L24 20 Z" fill="currentColor"/></svg>
+            Todo en un solo lugar
+          </span>
+          <h2>Todo lo que tu equipo necesita para avanzar</h2>
+          <p>Funciones pensadas para que dejes de perseguir tareas y empieces a cumplir plazos con tranquilidad.</p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature reveal">
+            <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></div>
+            <h3>Tableros visuales</h3>
+            <p>Organiza el trabajo en tableros tipo kanban. Arrastra y suelta cada tarea entre columnas para ver el avance de un vistazo.</p>
+          </article>
+
+          <article class="feature reveal" style="transition-delay:.06s">
+            <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></div>
+            <h3>Asignación de tareas</h3>
+            <p>Asigna responsables, define fechas de entrega y deja claro quién hace qué. Nadie vuelve a preguntar de quién era cada cosa.</p>
+          </article>
+
+          <article class="feature reveal" style="transition-delay:.12s">
+            <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <h3>Recordatorios automáticos</h3>
+            <p>Cumbre avisa a cada persona antes de que venza su tarea, para que ningún plazo importante se te escape.</p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            <h3>Seguimiento de progreso</h3>
+            <p>Mira en tiempo real cuánto falta para la meta con barras de avance y reportes claros, sin armar planillas a mano.</p>
+          </article>
+
+          <article class="feature reveal" style="transition-delay:.06s">
+            <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+            <h3>Colaboración en tiempo real</h3>
+            <p>Comenta, menciona a tu equipo y comparte archivos dentro de cada tarea. Toda la conversación queda donde tiene que estar.</p>
+          </article>
+
+          <article class="feature reveal" style="transition-delay:.12s">
+            <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+            <h3>Integraciones</h3>
+            <p>Conecta Cumbre con Slack, Google Calendar, Drive y las herramientas que ya usas. Todo tu flujo de trabajo, en un solo lugar.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TESTIMONIOS ===================== -->
+    <section class="section section--tint" id="testimonios">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 L12 5 L17 13 L20.5 8 L24 20 Z" fill="currentColor"/></svg>
+            Lo que dicen los equipos
+          </span>
+          <h2>Equipos que ya llegaron más lejos</h2>
+          <p>Miles de equipos pequeños usan Cumbre cada día. Esto es lo que cuentan.</p>
+        </div>
+
+        <div class="testi-grid">
+          <article class="testi reveal">
+            <div class="stars" role="img" aria-label="Valoración: 5 de 5 estrellas">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            </div>
+            <p class="quote">Antes vivíamos entre correos y notas sueltas. Con Cumbre, todo el equipo sabe qué hacer cada mañana y dejamos de perder tareas en el camino.</p>
+            <div class="testi-person">
+              <span class="avatar v1" aria-hidden="true">LF</span>
+              <span>
+                <span class="person-name">Lucía Fernández</span>
+                <span class="person-role">Directora de Operaciones · Nubo Estudio</span>
+              </span>
+            </div>
+          </article>
+
+          <article class="testi reveal" style="transition-delay:.08s">
+            <div class="stars" role="img" aria-label="Valoración: 5 de 5 estrellas">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            </div>
+            <p class="quote">Lo instalamos un lunes y para el viernes ya era parte de cómo trabajamos. Es la primera herramienta que mi equipo realmente quiso usar.</p>
+            <div class="testi-person">
+              <span class="avatar v2" aria-hidden="true">MR</span>
+              <span>
+                <span class="person-name">Mateo Rojas</span>
+                <span class="person-role">Cofundador · Brote</span>
+              </span>
+            </div>
+          </article>
+
+          <article class="testi reveal" style="transition-delay:.16s">
+            <div class="stars" role="img" aria-label="Valoración: 5 de 5 estrellas">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            </div>
+            <p class="quote">Como freelance manejo varios clientes a la vez. Cumbre me da el orden que necesito para cumplir cada entrega sin estrés ni cabos sueltos.</p>
+            <div class="testi-person">
+              <span class="avatar v3" aria-hidden="true">VC</span>
+              <span>
+                <span class="person-name">Valentina Cruz</span>
+                <span class="person-role">Diseñadora UX independiente</span>
+              </span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACTO ===================== -->
+    <section class="section" id="contacto">
+      <div class="container">
+        <div class="contact-grid">
+          <div class="contact-info reveal">
+            <span class="eyebrow">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20 L12 5 L17 13 L20.5 8 L24 20 Z" fill="currentColor"/></svg>
+              Hablemos
+            </span>
+            <h2>¿Listo para llevar a tu equipo a la cima?</h2>
+            <p>Cuéntanos sobre tu equipo y te mostramos cómo Cumbre puede ayudarte. Te respondemos en menos de 24 horas, sin compromiso.</p>
+
+            <div class="contact-list">
+              <div class="contact-item">
+                <span class="ci-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+                <span><strong>hola@cumbre.app</strong><span>Escríbenos cuando quieras</span></span>
+              </div>
+              <div class="contact-item">
+                <span class="ci-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                <span><strong>Respuesta en menos de 24 h</strong><span>De lunes a viernes</span></span>
+              </div>
+              <div class="contact-item">
+                <span class="ci-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m23 7-7 5 7 5z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span>
+                <span><strong>Demo en vivo</strong><span>Te la agendamos cuando te venga bien</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-card reveal" style="transition-delay:.1s">
+            <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+
+            <form id="contact-form" novalidate>
+              <div class="form-row">
+                <div class="field">
+                  <label for="nombre">Nombre <span class="req" aria-hidden="true">*</span></label>
+                  <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required autocomplete="name" />
+                </div>
+                <div class="field">
+                  <label for="email">Email <span class="req" aria-hidden="true">*</span></label>
+                  <input type="email" id="email" name="email" placeholder="tu@correo.com" required autocomplete="email" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="asunto">Empresa o asunto</label>
+                <input type="text" id="asunto" name="asunto" placeholder="Nombre de tu equipo o en qué podemos ayudarte" autocomplete="organization" />
+              </div>
+
+              <div class="field">
+                <label for="mensaje">Mensaje <span class="req" aria-hidden="true">*</span></label>
+                <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos sobre tu equipo y qué te gustaría lograr con Cumbre…" required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg btn-block">Enviar mensaje</button>
+              <p class="form-note">Al enviar aceptas nuestra <a href="#">Política de Privacidad</a>. No compartimos tus datos con nadie.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <svg class="footer-contours" viewBox="0 0 400 400" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round">
+        <path d="M20 380 L200 60 L380 380"/>
+        <path d="M80 380 L200 160 L320 380"/>
+        <path d="M130 380 L200 240 L270 380"/>
+      </g>
+    </svg>
+
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#inicio" class="brand" aria-label="Cumbre, inicio">
+            <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+              <rect width="36" height="36" rx="10" fill="#4338CA"/>
+              <path d="M6 27 L16 11 L21 20 L24.5 14.5 L30 27 Z" fill="#fff"/>
+              <path d="M16 11 L19.2 16.4 L12.8 16.4 Z" fill="#FF6A4D"/>
+            </svg>
+            <span class="brand-name">Cumbre</span>
+          </a>
+          <p class="footer-slogan">Lleva a tu equipo a la cima. Gestión de tareas y proyectos, simple y potente.</p>
+          <div class="socials">
+            <a href="#" aria-label="Cumbre en X (Twitter)"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#" aria-label="Cumbre en LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0z"/></svg></a>
+            <a href="#" aria-label="Cumbre en Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.332.014 7.052.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.332 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+            <a href="#" aria-label="Cumbre en GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Producto</h4>
+          <ul>
+            <li><a href="#caracteristicas">Características</a></li>
+            <li><a href="#contacto">Precios</a></li>
+            <li><a href="#caracteristicas">Integraciones</a></li>
+            <li><a href="#">Novedades</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Empresa</h4>
+          <ul>
+            <li><a href="#nosotros">Sobre nosotros</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Empleo</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacidad</a></li>
+            <li><a href="#">Términos</a></li>
+            <li><a href="#">Cookies</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Cumbre. Todos los derechos reservados.</span>
+        <span class="made">Hecho con <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 1.8 5 5.2 5c2 0 3.3 1.1 4.1 2.3l.7 1 .7-1C11.5 6.1 12.8 5 14.8 5c3.4 0 4.8 3.4 3.2 6.7C19.5 16.4 12 21 12 21z"/></svg> para equipos que llegan lejos.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+      document.documentElement.classList.add("js");
+
+      var header = document.querySelector(".site-header");
+      var navToggle = document.querySelector(".nav-toggle");
+      var mobileNav = document.getElementById("mobile-nav");
+
+      /* ---- Sombra del header al hacer scroll ---- */
+      function onScroll() {
+        if (window.scrollY > 8) header.classList.add("scrolled");
+        else header.classList.remove("scrolled");
+      }
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      /* ---- Menú móvil (hamburguesa) ---- */
+      function setMenu(open) {
+        navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        navToggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+        mobileNav.classList.toggle("open", open);
+        document.body.classList.toggle("nav-open", open);
+      }
+      navToggle.addEventListener("click", function () {
+        setMenu(navToggle.getAttribute("aria-expanded") !== "true");
+      });
+      // Cerrar al pulsar un enlace del menú
+      Array.prototype.forEach.call(mobileNav.querySelectorAll("a"), function (a) {
+        a.addEventListener("click", function () { setMenu(false); });
+      });
+      // Cerrar con Escape
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") setMenu(false);
+      });
+      // Cerrar al volver a escritorio
+      var mq = window.matchMedia("(min-width: 861px)");
+      var mqHandler = function (e) { if (e.matches) setMenu(false); };
+      if (mq.addEventListener) mq.addEventListener("change", mqHandler);
+      else if (mq.addListener) mq.addListener(mqHandler);
+
+      /* ---- Animaciones de aparición al hacer scroll ---- */
+      var reveals = document.querySelectorAll(".reveal");
+      if ("IntersectionObserver" in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+          });
+        }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+        Array.prototype.forEach.call(reveals, function (el) { io.observe(el); });
+      } else {
+        Array.prototype.forEach.call(reveals, function (el) { el.classList.add("in"); });
+      }
+
+      /* ---- Resaltado del enlace activo según la sección visible ---- */
+      var ids = ["inicio", "nosotros", "caracteristicas", "testimonios", "contacto"];
+      var sections = ids.map(function (id) { return document.getElementById(id); }).filter(Boolean);
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-links a, .mobile-nav a"));
+      if ("IntersectionObserver" in window && sections.length) {
+        var spy = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            var id = en.target.id;
+            navLinks.forEach(function (l) {
+              var active = l.getAttribute("href") === "#" + id;
+              l.classList.toggle("active", active);
+              if (active) l.setAttribute("aria-current", "true");
+              else l.removeAttribute("aria-current");
+            });
+          });
+        }, { threshold: 0.4, rootMargin: "-45% 0px -50% 0px" });
+        sections.forEach(function (s) { spy.observe(s); });
+      }
+
+      /* ---- Formulario de contacto (sin backend) ---- */
+      function escapeHtml(s) {
+        return s.replace(/[&<>"']/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+      }
+      var form = document.getElementById("contact-form");
+      var statusBox = document.getElementById("form-status");
+      if (form) {
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          if (!form.checkValidity()) { form.reportValidity(); return; }
+          var nombre = (document.getElementById("nombre").value || "").trim();
+          var first = nombre.split(" ")[0] || "";
+          var saludo = first ? ", " + escapeHtml(first) : "";
+          statusBox.innerHTML =
+            '<div class="status-card" tabindex="-1">' +
+              '<span class="status-icon" aria-hidden="true">' +
+                '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>' +
+              '</span>' +
+              '<div><strong>¡Mensaje enviado' + saludo + '!</strong>' +
+              '<span>Gracias por escribir a Cumbre. Te responderemos en menos de 24 horas.</span></div>' +
+            '</div>';
+          form.reset();
+          var card = statusBox.querySelector(".status-card");
+          if (card) card.focus();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
